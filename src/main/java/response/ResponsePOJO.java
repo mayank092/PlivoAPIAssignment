@@ -14,6 +14,8 @@ public class ResponsePOJO {
     private String error;
     @JsonProperty("detail")
     private String detail;
+    @JsonProperty("already_in_channel")
+    private Boolean already_in_channel;
 
 
     @JsonProperty("ok")
@@ -38,4 +40,8 @@ public class ResponsePOJO {
     public String getDetail () { return detail; }
     @JsonProperty("detail")
     public void setDetail (String detail) { this.detail = detail; }
+    @JsonProperty("already_in_channel")
+    public Boolean getAlready_In_Channel () { return already_in_channel; }
+    @JsonProperty("already_in_channel")
+    public void setAlready_In_Channel (Boolean already_in_channel) { this.already_in_channel = already_in_channel; }
 }

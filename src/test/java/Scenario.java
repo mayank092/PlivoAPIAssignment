@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * Used rest assured here so designing according to rest assured request
+ */
 public class Scenario {
     private static final Logger LOGGER = Logger.getLogger(Scenario.class);
 
-    @Test(dataProvider = "dataproviderForTestCase", dataProviderClass = GenericDataProvider.class, description = " ", groups = {"CreateChannelTest"})
+    @Test(dataProvider = "dataproviderForTestCase", dataProviderClass = GenericDataProvider.class, description = "This is the Complete end-to-end scenario Automation mentioned in the Assignment. ", groups = {"Scenario"})
     @CSVAnnotation.CSVFileParameters(delimiter = "#", path = "test-data/Scenario.csv")
     public void APIAutomationScenario(int rowNo, Map<String, String> testData) throws Exception {
         try {
@@ -34,23 +37,19 @@ public class Scenario {
             //doing assertion on status code
             if (createChannelResponse.statusCode() == HttpStatus.SC_OK && createChannelResponsePOJOObject.getOk().equals(true)) {
 
-                LOGGER.info("New Channel successfully created. Name:" + createChannelResponsePOJOObject.getChannel().getName() + ", Id: " + createChannelResponsePOJOObject.getChannel().getId());
-
-                //Deliberately commented below working piece of JoinChannelResponse code because channel created by a user is bydefault joined by the same user
-                // and execution of JoinChannel API gives error if called by the same user.
-
-/*                Response joinChannelResponse = executeJoinChannelTestBuilderAPI(testData);
+                LOGGER.debug("New Channel successfully created. Name:" + createChannelResponsePOJOObject.getChannel().getName() + ", Id: " + createChannelResponsePOJOObject.getChannel().getId());
+                Response joinChannelResponse = executeJoinChannelTestBuilderAPI(testData);
                 ResponsePOJO joinChannelResponsePOJOObject = joinChannelResponse.as(ResponsePOJO.class);
-                if (joinChannelResponse.statusCode() == HttpStatus.SC_OK && joinChannelResponsePOJOObject.getOk().equals(true)) {
+                if (joinChannelResponse.statusCode() == HttpStatus.SC_OK && joinChannelResponsePOJOObject.getOk().equals(true) && joinChannelResponsePOJOObject.getAlready_In_Channel().equals(true)) {
 
-                    LOGGER.info("Newly created Channel joined by Users:" + joinChannelResponsePOJOObject.getChannel().getMembers());
-*/                  String channelIdToBeRenamed = createChannelResponsePOJOObject.getChannel().getId();
+                    LOGGER.debug("Newly created Channel joined by Users:" + joinChannelResponsePOJOObject.getChannel().getMembers());
+                  String channelIdToBeRenamed = createChannelResponsePOJOObject.getChannel().getId();
                     Response renameChannelResponse = executeRenameChannelTestBuilderAPI(testData, channelIdToBeRenamed);
                     ResponsePOJO renameChannelResponsePOJOObject = renameChannelResponse.as(ResponsePOJO.class);
                     String channelIdToBeArchivedAtTheEnd = renameChannelResponsePOJOObject.getChannel().getId();
                     if (renameChannelResponse.statusCode() == HttpStatus.SC_OK && renameChannelResponsePOJOObject.getOk().equals(true)) {
 
-                        LOGGER.info("Channel: " + channelName + " succesfully renamed to " + newChannelName);
+                        LOGGER.debug("Channel: " + channelName + " succesfully renamed to " + newChannelName);
                         Response listChannelsResponse = executeListChannelsTestBuilderAPI(testData);
                         ListChannelsResponsePOJO listChannelsResponsePOJOObject = listChannelsResponse.as(ListChannelsResponsePOJO.class);
                         ArrayList<String> channelNames = new ArrayList<String>();
@@ -59,12 +58,12 @@ public class Scenario {
                         }
                         if (listChannelsResponse.statusCode() == HttpStatus.SC_OK && listChannelsResponsePOJOObject.getOk().equals(true) && channelNames.contains(newChannelName.toLowerCase()) && !channelNames.contains(channelName.toLowerCase())) {
 
-                            LOGGER.info("All expected channels were found out in the list");
+                            LOGGER.debug("All expected channels were found out in the list");
                             Response archiveChannelResponse = executeArchiveChannelTestBuilderAPI(testData, channelIdToBeArchivedAtTheEnd);
                             ResponsePOJO archiveChannelResponsePOJOObject = archiveChannelResponse.as(ResponsePOJO.class);
                             if (archiveChannelResponse.statusCode() == HttpStatus.SC_OK && archiveChannelResponsePOJOObject.getOk().equals(true)) {
 
-                                 LOGGER.info("End to end Scenario Automated");
+                                 LOGGER.debug("End to end Scenario Automated");
                             }
                             else{
                                 LOGGER.error("Invalid Response from archiveChannelAPI. " + archiveChannelResponsePOJOObject.getError());
@@ -75,13 +74,13 @@ public class Scenario {
                     }
                     else
                         LOGGER.error("Invalid Response from renameChannelAPI. " + renameChannelResponsePOJOObject.getError());
- /*               }
+                }
                 else
                     LOGGER.error("Invalid Response from joinChannelAPI : " + joinChannelResponsePOJOObject.getError());
-*/            } else
+            } else
                 LOGGER.error("Invalid Response from createChannelAPI. " + createChannelResponsePOJOObject.getError() + " " + createChannelResponsePOJOObject.getDetail());
         } catch (Exception e) {
-            LOGGER.info(e);
+            LOGGER.debug(e);
             Assert.fail("Scenario has failed..");
         }
     }
