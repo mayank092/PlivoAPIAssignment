@@ -30,55 +30,63 @@ public class Scenario {
             testData.put("channelName", channelName);
             testData.put("newChannelName", newChannelName);
 
-            // Executing CreateChannel API
+            System.out.println("Executing createChannelAPI..");
             Response createChannelResponse = executeCreateChannelTestBuilderAPI(testData);
             //Deserializing Response into ResponsePOJO class
             ResponsePOJO createChannelResponsePOJOObject = createChannelResponse.as(ResponsePOJO.class);
+            System.out.println("Succesfully Desearilized createChannelAPI response into Response POJO");
             //doing assertion on status code
             if (createChannelResponse.statusCode() == HttpStatus.SC_OK && createChannelResponsePOJOObject.getOk().equals(true)) {
 
-                LOGGER.debug("New Channel successfully created. Name:" + createChannelResponsePOJOObject.getChannel().getName() + ", Id: " + createChannelResponsePOJOObject.getChannel().getId());
+                System.out.println("New Channel successfully created. Name:" + createChannelResponsePOJOObject.getChannel().getName() + ", Id: " + createChannelResponsePOJOObject.getChannel().getId());
+                System.out.println("Now Executing joinChannelAPI..");
                 Response joinChannelResponse = executeJoinChannelTestBuilderAPI(testData);
                 ResponsePOJO joinChannelResponsePOJOObject = joinChannelResponse.as(ResponsePOJO.class);
+                System.out.println("Succesfully Desearilized joinChannelAPI response into Response POJO");
                 if (joinChannelResponse.statusCode() == HttpStatus.SC_OK && joinChannelResponsePOJOObject.getOk().equals(true) && joinChannelResponsePOJOObject.getAlready_In_Channel().equals(true)) {
 
-                    LOGGER.debug("Newly created Channel joined by Users:" + joinChannelResponsePOJOObject.getChannel().getMembers());
-                  String channelIdToBeRenamed = createChannelResponsePOJOObject.getChannel().getId();
+                    System.out.println("Newly created Channel joined by Users:" + joinChannelResponsePOJOObject.getChannel().getMembers());
+                    String channelIdToBeRenamed = createChannelResponsePOJOObject.getChannel().getId();
+                    System.out.println("Now Executing renameChannelAPI..");
                     Response renameChannelResponse = executeRenameChannelTestBuilderAPI(testData, channelIdToBeRenamed);
                     ResponsePOJO renameChannelResponsePOJOObject = renameChannelResponse.as(ResponsePOJO.class);
+                    System.out.println("Succesfully Desearilized renameChannelAPI response into Response POJO");
                     String channelIdToBeArchivedAtTheEnd = renameChannelResponsePOJOObject.getChannel().getId();
                     if (renameChannelResponse.statusCode() == HttpStatus.SC_OK && renameChannelResponsePOJOObject.getOk().equals(true)) {
 
-                        LOGGER.debug("Channel: " + channelName + " succesfully renamed to " + newChannelName);
+                        System.out.println("Channel: " + channelName + " succesfully renamed to " + newChannelName);
+                        System.out.println("Now Executing executeListChannelsAPI..");
                         Response listChannelsResponse = executeListChannelsTestBuilderAPI(testData);
                         ListChannelsResponsePOJO listChannelsResponsePOJOObject = listChannelsResponse.as(ListChannelsResponsePOJO.class);
+                        System.out.println("Succesfully Desearilized listChannelsAPI response into Response POJO");
                         ArrayList<String> channelNames = new ArrayList<String>();
                         for (int i = 0; i < listChannelsResponsePOJOObject.getChannels().size(); i++) {
                             channelNames.add(listChannelsResponsePOJOObject.getChannels().get(i).getName());
                         }
                         if (listChannelsResponse.statusCode() == HttpStatus.SC_OK && listChannelsResponsePOJOObject.getOk().equals(true) && channelNames.contains(newChannelName.toLowerCase()) && !channelNames.contains(channelName.toLowerCase())) {
 
-                            LOGGER.debug("All expected channels were found out in the list");
+                            System.out.println("All expected channels were found out in the list");
+                            System.out.println("Now Executing archiveChannelAPI..");
                             Response archiveChannelResponse = executeArchiveChannelTestBuilderAPI(testData, channelIdToBeArchivedAtTheEnd);
                             ResponsePOJO archiveChannelResponsePOJOObject = archiveChannelResponse.as(ResponsePOJO.class);
+                            System.out.println("Succesfully Desearilized archiveChannelAPI response into Response POJO");
                             if (archiveChannelResponse.statusCode() == HttpStatus.SC_OK && archiveChannelResponsePOJOObject.getOk().equals(true)) {
-
-                                 LOGGER.debug("End to end Scenario Automated");
+                                System.out.println("End to end Scenario Automated");
                             }
                             else{
-                                LOGGER.error("Invalid Response from archiveChannelAPI. " + archiveChannelResponsePOJOObject.getError());
+                                Assert.fail("Invalid Response from archiveChannelAPI. " + archiveChannelResponsePOJOObject.getError());
                             }
                         }
                         else
-                            LOGGER.error("Invalid Response from listChannelsAPI. " + listChannelsResponsePOJOObject.getError());
+                            Assert.fail("Invalid Response from listChannelsAPI. " + listChannelsResponsePOJOObject.getError());
                     }
                     else
-                        LOGGER.error("Invalid Response from renameChannelAPI. " + renameChannelResponsePOJOObject.getError());
+                        Assert.fail("Invalid Response from renameChannelAPI. " + renameChannelResponsePOJOObject.getError());
                 }
                 else
-                    LOGGER.error("Invalid Response from joinChannelAPI : " + joinChannelResponsePOJOObject.getError());
+                    Assert.fail("Invalid Response from joinChannelAPI : " + joinChannelResponsePOJOObject.getError());
             } else
-                LOGGER.error("Invalid Response from createChannelAPI. " + createChannelResponsePOJOObject.getError() + " " + createChannelResponsePOJOObject.getDetail());
+                Assert.fail("Invalid Response from createChannelAPI. " + createChannelResponsePOJOObject.getError() + " " + createChannelResponsePOJOObject.getDetail());
         } catch (Exception e) {
             LOGGER.debug(e);
             Assert.fail("Scenario has failed..");
